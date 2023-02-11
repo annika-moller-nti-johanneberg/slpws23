@@ -1,0 +1,9 @@
+h3 Log in
+
+form action="/login" method="post"
+    input name="name" placeholder="Name" type="text"/
+    input name="password" placeholder="Password" type="password"/
+    input type="submit" value="Log in"
+
+- if session["error"] != nil
+    p = session["error"]
