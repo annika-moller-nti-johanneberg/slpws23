@@ -25,6 +25,19 @@ def check_password(password)
     return nil
 end
 
+def create_article_id(title)
+    i = ""
+    id = title.tr(" ", "_").downcase
+
+    while true
+        if db.execute("SELECT * FROM Articles WHERE title = ?", id+i.to_s).length == 0
+            return id+i.to_s
+        else
+            i = i.to_i+1
+        end
+    end
+end
+
 get('/') do
     slim(:start)
 end
@@ -80,7 +93,34 @@ end
 
 get('/secret') do
     if session["name"] == nil
-        redirect('/login')
+      redirect('/login')
     end
     return "hemligt"
+end
+
+get('/article') do
+    query = params["query"]
+    @result = db.execute("SELECT * FROM Articles WHERE title LIKE '#{query}%'")
+    if @result.length == 1
+        redirect("/article/#{@result[0]['id']}")
+    end
+    slim(:list_articles)
+end
+
+get('/article/:id') do
+    id = params[:id]
+    @result = db.execute("SELECT * FROM Articles WHERE id = ?", id).first
+    slim(:article)
+end
+
+get('/article/create') do
+    slim(:create_article)
+end
+
+post('/article/create') do
+    title = params[:title]
+    body = params[:body]
+    id = create_article_id(title)
+    db.execute("INSERT INTO Articles (title, body, id) VALUES (?,?,?)", title, body, id)
+    redirect("/article/#{id}")
 end

@@ -1,0 +1,12 @@
+form action="/article" method="get"
+    input name="query" placeholder="Search Pediawiki" type="text"
+    input type="submit" value="Search"
+
+- if @result.empty?
+    p No results found
+
+ul
+    -  for article in @result
+        li 
+            a href="/article/#{article["id"]}" #{article["title"]}
+
