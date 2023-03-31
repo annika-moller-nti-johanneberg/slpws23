@@ -1,3 +1,5 @@
+h3 All articles
+
 form action="/article" method="get"
     input name="query" placeholder="Search Pediawiki" type="text"
     input type="submit" value="Search"
@@ -8,5 +10,5 @@ form action="/article" method="get"
 ul
     -  for article in @result
         li 
-            a href="/article/#{article["id"]}" #{article["title"]}
+            a href="/article/id/#{article["id"]}" #{article["title"]}
 

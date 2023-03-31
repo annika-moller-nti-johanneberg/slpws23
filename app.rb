@@ -27,7 +27,7 @@ end
 
 def create_article_id(title)
     i = ""
-    id = title.tr(" ", "_").downcase
+    id = title.tr(" ", "_").downcase.tr("å", "a").tr("ä", "a").tr("ö", "o")
 
     while true
         if db.execute("SELECT * FROM Articles WHERE title = ?", id+i.to_s).length == 0
@@ -102,12 +102,12 @@ get('/article') do
     query = params["query"]
     @result = db.execute("SELECT * FROM Articles WHERE title LIKE '#{query}%'")
     if @result.length == 1
-        redirect("/article/#{@result[0]['id']}")
+        redirect("/article/id/#{@result[0]['id']}")
     end
     slim(:list_articles)
 end
 
-get('/article/:id') do
+get('/article/id/:id') do
     id = params[:id]
     @result = db.execute("SELECT * FROM Articles WHERE id = ?", id).first
     slim(:article)
@@ -122,5 +122,24 @@ post('/article/create') do
     body = params[:body]
     id = create_article_id(title)
     db.execute("INSERT INTO Articles (title, body, id) VALUES (?,?,?)", title, body, id)
-    redirect("/article/#{id}")
+    redirect("/article/id/#{id}")
+end
+
+post('/article/id/:id/delete') do
+    db.execute("DELETE FROM Articles WHERE id =?", params[:id])
+    redirect("/article")
+end
+
+get('/article/id/:id/edit') do
+    @id = params[:id]
+    @result= db.execute("SELECT * FROM Articles WHERE id=?", @id).first
+    slim(:edit)
+end
+
+post('/article/id/:id/edit') do
+    title = params[:title]
+    body = params[:body]
+    @id = params[:id]
+    db.execute("UPDATE Articles SET title=?, body=? WHERE id=?", title, body, @id)
+    redirect("/article/id/#{@id}")
 end
