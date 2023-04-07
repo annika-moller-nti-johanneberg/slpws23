@@ -3,40 +3,8 @@ require 'slim'
 require 'sqlite3'
 require 'bcrypt'
 require "sinatra/reloader"
-
+require_relative 'model.rb'
 enable :sessions
-
-def db
-    database = SQLite3::Database.new("db/store.db")
-    database.results_as_hash = true
-    return database
-end
-
-def check_password(password)
-    if password.length <= 5
-        return "Password must be 6 or more characters!"
-    end
-    if password !~ /[A-Z]/
-        return "Password needs to contain at least one uppercase letter!"
-    end
-    if password !~ /[!.\-_@$*?&]/
-        return "Password must contain at least one special character"
-    end
-    return nil
-end
-
-def create_article_id(title)
-    i = ""
-    id = title.tr(" ", "_").downcase.tr("å", "a").tr("ä", "a").tr("ö", "o")
-
-    while true
-        if db.execute("SELECT * FROM Articles WHERE title = ?", id+i.to_s).length == 0
-            return id+i.to_s
-        else
-            i = i.to_i+1
-        end
-    end
-end
 
 get('/') do
     slim(:start)
@@ -49,13 +17,7 @@ end
 post('/login') do
     username = params[:name]
     password = params[:password]
-    result = db.execute("SELECT * FROM Users WHERE username = ?", username).first
-    if result != nil
-        if BCrypt::Password.new(result["password"]) == password
-            session["name"] = username
-            redirect('/secret')
-        end
-    end
+    login(username, password)
     session["error"] = "Username or password does not match"
     redirect('/login')
 end
@@ -72,9 +34,9 @@ post('/register') do
     if password == password_confirmation
         session["error"] = check_password(password)
         if session["error"] == nil
-            password_digest = BCrypt::Password.create(password)
+            password_digest = digest_password(password)
             begin #begins code to catch errors
-                db.execute("INSERT INTO Users (username, password) VALUES (?,?)", username, password_digest)
+                store_username_password_in_users(username, password_digest)
             rescue SQLite3::ConstraintException => error #catches constraint exceptions
                 if error.message.include?("name") #checks if constraint exception is of type name
                     session["error"] = "Username already exists"
@@ -100,7 +62,7 @@ end
 
 get('/article') do
     query = params["query"]
-    @result = db.execute("SELECT * FROM Articles WHERE title LIKE '#{query}%'")
+    @result = get_article_by_title(query)
     if @result.length == 1
         redirect("/article/id/#{@result[0]['id']}")
     end
@@ -109,7 +71,7 @@ end
 
 get('/article/id/:id') do
     id = params[:id]
-    @result = db.execute("SELECT * FROM Articles WHERE id = ?", id).first
+    @result = get_article_by_id(id)
     slim(:article)
 end
 
@@ -121,18 +83,19 @@ post('/article/create') do
     title = params[:title]
     body = params[:body]
     id = create_article_id(title)
-    db.execute("INSERT INTO Articles (title, body, id) VALUES (?,?,?)", title, body, id)
+    create_article(title, body, id)
     redirect("/article/id/#{id}")
 end
 
 post('/article/id/:id/delete') do
-    db.execute("DELETE FROM Articles WHERE id =?", params[:id])
+    id = params[:id]
+    delete_article_by_id(id)
     redirect("/article")
 end
 
 get('/article/id/:id/edit') do
     @id = params[:id]
-    @result= db.execute("SELECT * FROM Articles WHERE id=?", @id).first
+    @result= get_article_by_id(@id)
     slim(:edit)
 end
 
@@ -140,6 +103,6 @@ post('/article/id/:id/edit') do
     title = params[:title]
     body = params[:body]
     @id = params[:id]
-    db.execute("UPDATE Articles SET title=?, body=? WHERE id=?", title, body, @id)
+    edit_article_by_id(title, body, @id)
     redirect("/article/id/#{@id}")
 end
