@@ -24,11 +24,22 @@ def digest_password(password)
     BCrypt::Password.create(password)
 end
 
-def store_username_password_in_users(username, password_digest)
-    db.execute("INSERT INTO Users (username, password) VALUES (?,?)", username, password_digest)
+def store_user_data(username, password_digest)
+    db.execute("INSERT INTO Users (username, password, permission_level) VALUES (?,?,?)", username, password_digest, 1)
 end
 
-def create_article_id(title)
+def login(username, password)
+    result = db.execute("SELECT * FROM Users WHERE username = ?", username).first
+    if result != nil
+        if BCrypt::Password.new(result["password"]) == password
+            session["name"] = username
+            session["id"] = result["id"]
+            redirect('/secret')
+        end
+    end
+end
+
+def generate_article_id(title)
     i = ""
     id = title.tr(" ", "_").downcase.tr("å", "a").tr("ä", "a").tr("ö", "o")
 
@@ -37,16 +48,6 @@ def create_article_id(title)
             return id+i.to_s
         else
             i = i.to_i+1
-        end
-    end
-end
-
-def login(username, password)
-    result = db.execute("SELECT * FROM Users WHERE username = ?", username).first
-    if result != nil
-        if BCrypt::Password.new(result["password"]) == password
-            session["name"] = username
-            redirect('/secret')
         end
     end
 end
@@ -60,7 +61,7 @@ def get_article_by_id(id)
 end
 
 def create_article(title, body, id)
-    db.execute("INSERT INTO Articles (title, body, id) VALUES (?,?,?)", title, body, id)
+    db.execute("INSERT INTO Articles (title, body, id, protection_level) VALUES (?,?,?,?)", title, body, id, 1)
 end
 
 def delete_article_by_id(id)
@@ -69,4 +70,12 @@ end
 
 def edit_article_by_id(title, body, id)
     db.execute("UPDATE Articles SET title=?, body=? WHERE id=?", title, body, id)
+end
+
+def get_permission_level_by_id(id)
+    db.execute("SELECT permission_level FROM Users WHERE id=?", id).first
+end
+
+def get_protection_level_by_id(id)
+    db.execute("SELECT protection_level FROM Articles WHERE id=?", id).first
 end

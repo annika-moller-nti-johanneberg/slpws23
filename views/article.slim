@@ -6,3 +6,6 @@ form action="/article/id/#{@result["id"]}/delete" method="post"
 
 form action="/article/id/#{@result["id"]}/edit" method="get"
     input type="submit" value="Edit"
+
+- if session["error"] != nil
+    p = session["error"]

@@ -5,6 +5,20 @@ require 'bcrypt'
 require "sinatra/reloader"
 require_relative 'model.rb'
 enable :sessions
+also_reload('model.rb')
+
+def authorize(protection_level)
+    user_id = session["id"]
+    permission_level = get_permission_level_by_id(user_id)
+
+    if user_id == nil
+        session["error"] = "You need to be logged in"
+        redirect('/login')
+    elsif permission_level["permission_level"] < protection_level["protection_level"]
+        session["error"] = "You do not have permission to do that"
+        redirect('/article')
+    end
+end
 
 get('/') do
     slim(:start)
@@ -20,6 +34,7 @@ post('/login') do
     login(username, password)
     session["error"] = "Username or password does not match"
     redirect('/login')
+    session["error"] = nil
 end
 
 get('/register') do
@@ -36,7 +51,7 @@ post('/register') do
         if session["error"] == nil
             password_digest = digest_password(password)
             begin #begins code to catch errors
-                store_username_password_in_users(username, password_digest)
+                store_user_data(username, password_digest)
             rescue SQLite3::ConstraintException => error #catches constraint exceptions
                 if error.message.include?("name") #checks if constraint exception is of type name
                     session["error"] = "Username already exists"
@@ -51,6 +66,7 @@ post('/register') do
         redirect('/register')
     end
     redirect('/')
+    session["error"] = nil
 end
 
 get('/secret') do
@@ -82,14 +98,15 @@ end
 post('/article/create') do
     title = params[:title]
     body = params[:body]
-    id = create_article_id(title)
+    id = generate_article_id(title)
     create_article(title, body, id)
     redirect("/article/id/#{id}")
 end
 
 post('/article/id/:id/delete') do
-    id = params[:id]
-    delete_article_by_id(id)
+    article_id = params[:id]
+    authorize(get_protection_level_by_id(article_id))
+    delete_article_by_id(article_id)
     redirect("/article")
 end
 
@@ -103,6 +120,7 @@ post('/article/id/:id/edit') do
     title = params[:title]
     body = params[:body]
     @id = params[:id]
+    authorize(get_protection_level_by_id(@id))
     edit_article_by_id(title, body, @id)
     redirect("/article/id/#{@id}")
 end
