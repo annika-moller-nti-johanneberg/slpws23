@@ -45,13 +45,19 @@ get("/login") do
   slim(:login)
 end
 
+last_login = Hash.new(0)
+
 post("/login") do
+  if Time.now.to_f - last_login[request.ip] < 1
+    session["error"] = "Too many tries, wait a sec"
+    redirect("/login")
+  end
   username = params[:name]
   password = params[:password]
   login(username, password)
   session["error"] = "Username or password does not match"
+  last_login[request.ip] = Time.now.to_f
   redirect("/login")
-  session["error"] = nil
 end
 
 get("/register") do
@@ -83,7 +89,6 @@ post("/register") do
     redirect("/register")
   end
   redirect("/")
-  session["error"] = nil
 end
 
 get("/secret") do
