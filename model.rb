@@ -34,7 +34,8 @@ def login(username, password)
         if BCrypt::Password.new(result["password"]) == password
             session["name"] = username
             session["id"] = result["id"]
-            redirect('/secret')
+            session["error"] = nil
+            redirect('/article')
         end
     end
 end
@@ -78,4 +79,16 @@ end
 
 def get_protection_level_by_id(id)
     db.execute("SELECT protection_level FROM Articles WHERE id=?", id).first
+end
+
+def create_like(user_id, article_id)
+    db.execute("INSERT INTO Likes (user_id, article_id) VALUES (?,?)", user_id, article_id)
+end
+
+def get_like(user_id, article_id)
+    db.execute("SELECT id FROM Likes WHERE user_id=? AND article_id=?", user_id, article_id).first
+end
+
+def get_likes_by_article_id(article_id)
+    db.execute("SELECT COUNT(*) as likes FROM Likes WHERE article_id=?", article_id).first["likes"]
 end

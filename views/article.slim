@@ -7,5 +7,11 @@ form action="/article/id/#{@result["id"]}/delete" method="post"
 form action="/article/id/#{@result["id"]}/edit" method="get"
     input type="submit" value="Edit"
 
+form action="/article/id/#{@result["id"]}/like" method="post"
+    input type="submit" value="Like"
+
+p likes: #{@likes}
+
 - if session["error"] != nil
     p = session["error"]
+    - session["error"] = nil

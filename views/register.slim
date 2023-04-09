@@ -8,3 +8,4 @@ form action="/register" method="post"
 
 - if session["error"] != nil
     p = session["error"]
+    - session["error"] = nil
