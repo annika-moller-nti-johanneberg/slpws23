@@ -53,7 +53,7 @@ def generate_article_id(title)
     end
 end
 
-def get_article_by_title(query)
+def get_articles_by_title(query)
     db.execute("SELECT * FROM Articles WHERE title LIKE '#{query}%'")
 end
 
@@ -89,6 +89,10 @@ def get_like(user_id, article_id)
     db.execute("SELECT id FROM Likes WHERE user_id=? AND article_id=?", user_id, article_id).first
 end
 
-def get_likes_by_article_id(article_id)
+# Gets like count
+#
+# @params [String] article-id, The id of the article
+# @return [Integer] like_count, The amount of likes for a certain article
+def get_like_count_by_article_id(article_id)
     db.execute("SELECT COUNT(*) as likes FROM Likes WHERE article_id=?", article_id).first["likes"]
 end

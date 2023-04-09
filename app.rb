@@ -64,6 +64,11 @@ get("/register") do
   slim(:register)
 end
 
+# Register new user
+#
+# @param [String] name, The username of the user
+# @param [String] password, The password of the user
+# @param [String] password_confirmation, The password of the user again
 post("/register") do
   session["error"] = nil
   username = params[:name]
@@ -100,17 +105,21 @@ end
 
 get("/article") do
   query = params["query"]
-  @result = get_article_by_title(query)
+  @result = get_articles_by_title(query)
   if @result.length == 1
     redirect("/article/id/#{@result[0]["id"]}")
   end
   slim(:list_articles)
 end
 
+
+# View article by id
+#
+# @param [String] :id, The id of the article
 get("/article/id/:id") do
   id = params[:id]
   @result = get_article_by_id(id)
-  @likes = get_likes_by_article_id(id)
+  @likes = get_like_count_by_article_id(id)
   slim(:article)
 end
 
@@ -118,6 +127,10 @@ get("/article/create") do
   slim(:create_article)
 end
 
+# Create article
+#
+# @param [String] title, The title of the article
+# @param [String] body, The body of the article
 post("/article/create") do
   title = params[:title]
   body = params[:body]
