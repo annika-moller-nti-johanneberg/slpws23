@@ -20,9 +20,10 @@ GEM
     minitest (5.18.0)
     tzinfo (2.0.6)
       concurrent-ruby (~> 1.0)
-    yard (0.9.29)
+    yard (0.9.34)
 
 PLATFORMS
+  x64-mingw-ucrt
   x86_64-darwin-21
 
 DEPENDENCIES
@@ -30,4 +31,4 @@ DEPENDENCIES
   yard-sinatra!
 
 BUNDLED WITH
-   2.4.10
+   2.4.12

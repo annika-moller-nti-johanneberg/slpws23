@@ -7,6 +7,9 @@ require_relative "model.rb"
 enable :sessions
 also_reload("model.rb")
 
+# Check permission level and redirect if not fulfilled
+#
+# @param [Integer] protection_level, The articles level of protection
 def authorize(protection_level)
   user_id = session["id"]
   permission_level = get_permission_level_by_id(user_id)
@@ -20,6 +23,9 @@ def authorize(protection_level)
   end
 end
 
+# Check if user has alredy liked and redirect if not fulfilled
+#
+# @param [String] article_id, The article id
 def like(article_id)
   user_id = session["id"]
   existing_like = get_like(user_id, article_id)
@@ -37,16 +43,22 @@ def like(article_id)
   end
 end
 
+# Displays the root page
 get("/") do
   slim(:start)
 end
 
+# Displays the login-page
 get("/login") do
   slim(:login)
 end
 
 last_login = Hash.new(0)
 
+# Login
+#
+# @param [String] username, The users username
+# @param [String] password, The users password
 post("/login") do
   if Time.now.to_f - last_login[request.ip] < 1
     session["error"] = "Too many tries, wait a sec"
@@ -60,6 +72,7 @@ post("/login") do
   redirect("/login")
 end
 
+# Displays the register-page
 get("/register") do
   slim(:register)
 end
@@ -96,13 +109,9 @@ post("/register") do
   redirect("/")
 end
 
-get("/secret") do
-  if session["name"] == nil
-    redirect("/login")
-  end
-  return "hemligt"
-end
-
+# Gets article
+#
+# @param [String] query, The search result
 get("/article") do
   query = params["query"]
   @result = get_articles_by_title(query)
@@ -123,6 +132,7 @@ get("/article/id/:id") do
   slim(:article)
 end
 
+# Displays "create article"-page
 get("/article/create") do
   slim(:create_article)
 end
@@ -139,6 +149,9 @@ post("/article/create") do
   redirect("/article/id/#{id}")
 end
 
+# Delete article
+#
+# @param [String] :id, The id of the article
 post("/article/id/:id/delete") do
   article_id = params[:id]
   authorize(get_protection_level_by_id(article_id))
@@ -146,12 +159,20 @@ post("/article/id/:id/delete") do
   redirect("/article")
 end
 
+# Displays edit-page
+#
+# @params [String] :id, The article id
 get("/article/id/:id/edit") do
   @id = params[:id]
   @result = get_article_by_id(@id)
   slim(:edit)
 end
 
+# Edit article
+#
+# @param [String] :id, The id of the article
+# @param [String] title, The title of the article
+# @param [String] body, The body of the article
 post("/article/id/:id/edit") do
   title = params[:title]
   body = params[:body]
@@ -161,6 +182,9 @@ post("/article/id/:id/edit") do
   redirect("/article/id/#{@id}")
 end
 
+# Create like
+# 
+# @param [String] :id, The id of the article
 post("/article/id/:id/like") do
   article_id = params["id"]
   like(article_id)
