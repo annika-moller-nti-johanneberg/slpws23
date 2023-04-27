@@ -109,6 +109,12 @@ post("/register") do
   redirect("/")
 end
 
+# Logout the user
+get("/logout") do
+  session.clear
+  redirect("/")
+end
+
 # Gets article
 #
 # @param [String] query, The search result
@@ -145,6 +151,7 @@ post("/article/create") do
   title = params[:title]
   body = params[:body]
   id = generate_article_id(title)
+  authorize(get_protection_level_by_id(id))
   create_article(title, body, id)
   redirect("/article/id/#{id}")
 end

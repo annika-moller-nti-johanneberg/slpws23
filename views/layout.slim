@@ -11,5 +11,7 @@ html lang="en"
             a href="/register" class="padding" Register  
             a href="/article/create" class="padding" Create article
             a href="/article" class="padding" All articles
+            form action="/logout" method="get"
+                input type="submit" value="Log out"
         main
             == yield
