@@ -19,7 +19,7 @@ def authorize(protection_level)
   if user_id == nil
     session["error"] = "You need to be logged in"
     redirect("/login")
-  elsif permission_level["permission_level"] < protection_level["protection_level"]
+  elsif permission_level < protection_level
     session["error"] = "You do not have permission to do that"
     redirect("/article")
   end
@@ -75,7 +75,7 @@ post("/article") do
   title = params[:title]
   body = params[:body]
   id = generate_article_id(title)
-  authorize(get_protection_level_by_id(id))
+  authorize(1)
   create_article(title, body, id)
   redirect("/article/#{id}")
 end

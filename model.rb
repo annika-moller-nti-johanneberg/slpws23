@@ -119,14 +119,14 @@ end
 #
 # @param [Integer] id, The user id
 def get_permission_level_by_id(id)
-    db.execute("SELECT permission_level FROM Users WHERE id=?", id).first
+    db.execute("SELECT permission_level FROM Users WHERE id=?", id).first["permission_level"]
 end
 
 # Gets an articles protection level
 #
 # @param [String] id, The article id 
 def get_protection_level_by_id(id)
-    db.execute("SELECT protection_level FROM Articles WHERE id=?", id).first
+    db.execute("SELECT protection_level FROM Articles WHERE id=?", id).first["protection_level"]
 end
 
 # Store like in database
