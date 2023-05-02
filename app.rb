@@ -169,7 +169,7 @@ end
 # @param [String] :id, The id of the article
 # @param [String] title, The title of the article
 # @param [String] body, The body of the article
-post("/article/:id/update") do
+post("/article/:id/edit") do
   title = params[:title]
   body = params[:body]
   @id = params[:id]

@@ -54,7 +54,7 @@ def login(username, password)
             session["name"] = username
             session["id"] = result["id"]
             session["error"] = nil
-            redirect('/article/article')
+            redirect('/article')
         end
     end
 end
