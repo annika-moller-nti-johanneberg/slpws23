@@ -1,13 +1,13 @@
 h1 = @result["title"]
 div = @result["body"]
 
-form action="/article/id/#{@result["id"]}/delete" method="post"
+form action="/article/#{@result["id"]}/delete" method="post"
     input type="submit" value="Delete"
 
-form action="/article/id/#{@result["id"]}/edit" method="get"
+form action="/article/#{@result["id"]}/edit" method="get"
     input type="submit" value="Edit"
 
-form action="/article/id/#{@result["id"]}/like" method="post"
+form action="/article/#{@result["id"]}/like" method="post"
     input type="submit" value="Like"
 
 p likes: #{@likes}

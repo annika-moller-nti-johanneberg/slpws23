@@ -10,5 +10,5 @@ form action="/article" method="get"
 ul
     -  for article in @result
         li 
-            a href="/article/id/#{article["id"]}" #{article["title"]}
+            a href="/article/#{article["id"]}" #{article["title"]}
 
