@@ -164,5 +164,5 @@ def new_permission_level(permission_level, user_id)
 end
 
 def get_users_by_permission_level(user_id)
-    db.execute("SELECT username, id FROM Users WHERE #{get_permission_level_by_id(user_id)} >= permission_level")
+    db.execute("SELECT username, id FROM Users WHERE ? >= permission_level", get_permission_level_by_id(user_id))
 end

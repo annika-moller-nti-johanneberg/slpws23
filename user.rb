@@ -76,6 +76,7 @@ get("/login") do
 
   # Displays "manage users"-page for admins
 get("/users") do
+  @user_id = session[:id]
   @users = get_users_by_permission_level(@user_id)
   slim(:'/user/users')
 end
@@ -88,7 +89,11 @@ get("/user/:id") do
 end
 
 post("/user/:id/update") do
+  @id = session[:id]
   @user_id = params[:id]
+  if get_permission_level_by_id(@id) <= get_permission_level_by_id(@user_id)
+    redirect("/users")
+  end
   permission_level = params[:permission_level]
   new_permission_level(permission_level, @user_id)
   redirect("/users")
