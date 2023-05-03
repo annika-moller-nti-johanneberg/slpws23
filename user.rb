@@ -81,6 +81,8 @@ get("/users") do
   slim(:'/user/users')
 end
 
+# Displays page to edit user params
+# @param [String] id, The id of the user
 get("/user/:id") do
   @user_id = params[:id]
   @user = get_user_by_id(@user_id)
@@ -88,13 +90,20 @@ get("/user/:id") do
 
 end
 
+# Update user params
+# @param [String] id, The id of the user
 post("/user/:id/update") do
   @id = session[:id]
   @user_id = params[:id]
   if get_permission_level_by_id(@id) <= get_permission_level_by_id(@user_id)
     redirect("/users")
   end
+    
   permission_level = params[:permission_level]
+  if permission_level > get_permission_level_by_id(@id)
+      redirect("/users")
+  end
+    
   new_permission_level(permission_level, @user_id)
   redirect("/users")
 end
