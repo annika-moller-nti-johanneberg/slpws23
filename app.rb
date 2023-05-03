@@ -45,6 +45,16 @@ def like(article_id)
   end
 end
 
+['/article/:id/delete', '/article/new', '/article/:id/edit', '/article/:id/like', '/users', '/user/:id', '/user/:id/update'].each do |route|
+  before(route) do
+    user_id = session["id"]
+    if user_id == nil
+      session["error"] = "You need to be logged in"
+      redirect("/login")
+    end
+  end
+end
+
 # Displays the root page
 get("/") do
   slim(:index)
@@ -130,4 +140,24 @@ get("/article/:id") do
   @result = get_article_by_id(id)
   @likes = get_like_count_by_article_id(id)
   slim(:'/article/article')
+end
+
+# Displays "manage users"-page for admins
+get("/users") do
+  @users = get_all_users()
+  slim(:'/user/users')
+end
+
+get("/user/:id") do
+  @user_id = params[:id]
+  @user = get_user_by_id(@user_id)
+  slim(:'user/user')
+
+end
+
+post("/user/:id/update") do
+  @user_id = params[:id]
+  permission_level = params[:permission_level]
+  new_permission_level(permission_level, @user_id)
+  redirect("/users")
 end

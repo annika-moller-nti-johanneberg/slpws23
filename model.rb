@@ -152,3 +152,15 @@ end
 def get_like_count_by_article_id(article_id)
     db.execute("SELECT COUNT(*) as likes FROM Likes WHERE article_id=?", article_id).first["likes"]
 end
+
+def get_all_users()
+    db.execute("SELECT id, username, permission_level FROM Users")
+end
+
+def get_user_by_id(user_id)
+    db.execute("SELECT username, permission_level FROM Users WHERE id=?", user_id).first
+end
+
+def new_permission_level(permission_level, user_id)
+    db.execute("UPDATE Users SET permission_level=? WHERE id=?", permission_level, user_id)
+end

@@ -1,0 +1,5 @@
+h1 = @user["username"]
+
+form action="/user/#{@user_id}/update" method="post"
+    input name="permission_level" value="#{@user["permission_level"]}" type="text"
+    input type="submit" value="Edit user"
