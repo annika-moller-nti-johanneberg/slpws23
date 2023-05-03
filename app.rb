@@ -141,23 +141,3 @@ get("/article/:id") do
   @likes = get_like_count_by_article_id(id)
   slim(:'/article/article')
 end
-
-# Displays "manage users"-page for admins
-get("/users") do
-  @users = get_all_users()
-  slim(:'/user/users')
-end
-
-get("/user/:id") do
-  @user_id = params[:id]
-  @user = get_user_by_id(@user_id)
-  slim(:'user/user')
-
-end
-
-post("/user/:id/update") do
-  @user_id = params[:id]
-  permission_level = params[:permission_level]
-  new_permission_level(permission_level, @user_id)
-  redirect("/users")
-end

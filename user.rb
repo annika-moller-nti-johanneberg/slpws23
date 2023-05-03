@@ -19,7 +19,13 @@ get("/login") do
     end
     username = params[:name]
     password = params[:password]
-    login(username, password)
+    id = login(username, password)
+    if id != nil
+      session["name"] = username
+      session["id"] = id
+      session["error"] = nil
+      redirect('/article')
+    end
     session["error"] = "Username or password does not match"
     last_login[request.ip] = Time.now.to_f
     redirect("/login")
@@ -67,3 +73,23 @@ get("/login") do
     session.clear
     redirect("/")
   end
+
+  # Displays "manage users"-page for admins
+get("/users") do
+  @users = get_users_by_permission_level(@user_id)
+  slim(:'/user/users')
+end
+
+get("/user/:id") do
+  @user_id = params[:id]
+  @user = get_user_by_id(@user_id)
+  slim(:'user/user')
+
+end
+
+post("/user/:id/update") do
+  @user_id = params[:id]
+  permission_level = params[:permission_level]
+  new_permission_level(permission_level, @user_id)
+  redirect("/users")
+end

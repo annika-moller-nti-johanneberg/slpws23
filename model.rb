@@ -51,12 +51,10 @@ def login(username, password)
     result = db.execute("SELECT * FROM Users WHERE username = ?", username).first
     if result != nil
         if BCrypt::Password.new(result["password"]) == password
-            session["name"] = username
-            session["id"] = result["id"]
-            session["error"] = nil
-            redirect('/article')
+            return result["id"]
         end
     end
+    return nil
 end
 
 # Generates id for article
@@ -163,4 +161,8 @@ end
 
 def new_permission_level(permission_level, user_id)
     db.execute("UPDATE Users SET permission_level=? WHERE id=?", permission_level, user_id)
+end
+
+def get_users_by_permission_level(user_id)
+    db.execute("SELECT username, id FROM Users WHERE #{get_permission_level_by_id(user_id)} >= permission_level")
 end
