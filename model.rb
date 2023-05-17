@@ -93,8 +93,15 @@ end
 # @param [String] title, The article title
 # @param [String] body, The article body
 # @param [String] id, The article id
-def create_article(title, body, id)
-    db.execute("INSERT INTO Articles (title, body, id, protection_level) VALUES (?,?,?,?)", title, body, id, 1)
+def create_article(title, body, id, user_id)
+    db.execute("INSERT INTO Articles (title, body, id, user_id, protection_level) VALUES (?,?,?,?,?)", title, body, id, user_id, 1)
+end
+
+# Gets id of user who wrote article
+#
+# @param [String] id, The id of the article
+def get_user_by_article(id)
+    db.execute("SELECT user_id FROM Articles WHERE id =?", id)
 end
 
 # Deletes article from database
@@ -164,5 +171,5 @@ def new_permission_level(permission_level, user_id)
 end
 
 def get_users_by_permission_level(user_id)
-    db.execute("SELECT username, id FROM Users WHERE ? >= permission_level", get_permission_level_by_id(user_id))
+    db.execute("SELECT username, id FROM Users WHERE ? > permission_level", get_permission_level_by_id(user_id))
 end

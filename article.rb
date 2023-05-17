@@ -1,3 +1,6 @@
+require 'sqlite3'
+require 'bcrypt'
+
 # Gets article
 #
 # @param [String] query, The search result
@@ -20,11 +23,12 @@ get("/article") do
   # @param [String] title, The title of the article
   # @param [String] body, The body of the article
   post("/article") do
+    user_id = session["id"]
     title = params[:title]
     body = params[:body]
     id = generate_article_id(title)
     authorize(1)
-    create_article(title, body, id)
+    create_article(title, body, id, user_id)
     redirect("/article/#{id}")
   end
   
@@ -34,6 +38,9 @@ get("/article") do
   post("/article/:id/delete") do
     article_id = params[:id]
     authorize(get_protection_level_by_id(article_id))
+    if get_user_by_article(article_id) != params["user_id"]
+      return "You are not allowed to remove articles that are not your own"
+    end
     delete_article_by_id(article_id)
     redirect("/article")
   end
@@ -57,6 +64,9 @@ get("/article") do
     body = params[:body]
     @id = params[:id]
     authorize(get_protection_level_by_id(@id))
+    if get_user_by_article(@id) != params["user_id"]
+      return "You are not allowed to edit articles that are not your own"
+    end
     edit_article_by_id(title, body, @id)
     redirect("/article/#{@id}")
   end

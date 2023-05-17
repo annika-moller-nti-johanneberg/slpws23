@@ -100,7 +100,7 @@ post("/user/:id/update") do
   end
     
   permission_level = params[:permission_level]
-  if permission_level > get_permission_level_by_id(@id)
+  if permission_level.to_i > get_permission_level_by_id(@id).to_i
       redirect("/users")
   end
     
